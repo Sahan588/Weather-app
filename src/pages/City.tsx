@@ -52,7 +52,7 @@ const City: React.FC = () => {
           pagination={{ clickable: true }}
           breakpoints={{
             640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
+            1024: { slidesPerView: 10 },
           }}
           className="px-4"
         >
