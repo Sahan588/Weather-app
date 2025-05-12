@@ -36,9 +36,10 @@ const Home: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handleCityClick = (city: weatherData) => {
-    navigate('/city', { state: { city } });
-  };
+const handleCityClick = (city: weatherData) => {
+  navigate(`/city?lon=${city.coord.lon}&lat=${city.coord.lat}`, { state: { city } });
+};
+
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
