@@ -56,6 +56,16 @@ export interface ForecastResponse {
   };
 }
 
+export interface CityDisplayData { 
+  temp: number;
+  feels_like: number;
+  humidity: number;
+  sea_level: number;
+  speed: number;
+  description: string;
+  icon: string;
+} 
+
 const apikey = process.env.REACT_APP_WEATHER_API_KEY || '';
 
 export const fetchweather = async (Ids: string): Promise<weatherData[]> => {
