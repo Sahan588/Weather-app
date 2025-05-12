@@ -27,32 +27,37 @@ export interface weatherData {
   ];
 }
 
-export interface CityData{
-  main:{
+export interface CityData {
+  dt: number;
+  main: {
     temp: number;
     feels_like: number;
     humidity: number;
-    sea_level: number;
+    sea_level?: number;
   };
-  dt: number;
-  wind:[{
-      id:number;
-      main:string;
-      description: string;
-      icon: string;
-  }]
-  weather: [
-    {
-      id: number;
-      main: string;
-      description: string;
-      icon: string;
-    }
-  ];
+  weather: {
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+  }[];
+  wind: {
+    speed: number;
+    deg: number;
+  };
 }
+
+export interface ForecastResponse {
+  list: CityData[];
+  city: {
+    name: string;
+    country: string;
+    timezone: number;
+  };
+}
+
 const apikey = process.env.REACT_APP_WEATHER_API_KEY || '';
 
-//  weather for multiple city IDs
 export const fetchweather = async (Ids: string): Promise<weatherData[]> => {
   const response = await fetch(
     `https://api.openweathermap.org/data/2.5/group?id=${Ids}&appid=${apikey}&units=metric`
@@ -62,7 +67,6 @@ export const fetchweather = async (Ids: string): Promise<weatherData[]> => {
   return data.list;
 };
 
-//  Fetch weather by lat & lon (fixed the API call)
 export const getWeatherByCood = async (
   lat: string,
   lon: string
@@ -74,7 +78,6 @@ export const getWeatherByCood = async (
   return await response.json();
 };
 
-// Fetch weather by city name (added this function to fix your error)
 export const getCityByName = async (cityName: string): Promise<weatherData> => {
   const response = await fetch(
     `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apikey}&units=metric`
@@ -83,12 +86,13 @@ export const getCityByName = async (cityName: string): Promise<weatherData> => {
   return await response.json();
 };
 
-export const getCityForecast = async (lat: string, lon: string) : Promise<CityData[]>=>{
+export const getCityForecast = async (
+  lat: string,
+  lon: string
+): Promise<ForecastResponse> => {
   const response = await fetch(
     `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apikey}&units=metric`
   );
   if (!response.ok) throw new Error('Failed to fetch data');
-  const data = await response.json();
-  console.log(data.list);
-  return data.list;
+  return await response.json();
 };

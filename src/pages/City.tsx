@@ -1,72 +1,60 @@
-import React, { useEffect } from 'react';
-import { useLocation,useSearchParams } from 'react-router';
+import React from 'react';
+import { useLocation, useSearchParams } from 'react-router';
 import CityCard from '../components/CityCard';
-import { CityData, getCityForecast, getWeatherByCood, weatherData } from '../extra/api';
+import { CityData, ForecastResponse, getCityForecast, getWeatherByCood, weatherData } from '../extra/api';
 import { useQuery } from '@tanstack/react-query';
 
-
 const City: React.FC = () => {
-
   const [searchParams] = useSearchParams();
-  const lon = searchParams.get('lon') ||'';
-  const lat = searchParams.get('lat') ||'';
-
-  console.log(lon,lat);
+  const lon = searchParams.get('lon') || '';
+  const lat = searchParams.get('lat') || '';
 
   const location = useLocation();
-  const {city} = (location.state || {} ) as { city: weatherData }; 
+  const { city } = (location.state || {}) as { city: weatherData };
 
-  const {data:newCity,isLoading,error} = useQuery({ 
-    queryKey:['weatherByCood'],
-    queryFn: () => getWeatherByCood(lat,lon),
-    enabled:!city
+  const { data: newCity, isLoading, error } = useQuery({
+    queryKey: ['weatherByCood'],
+    queryFn: () => getWeatherByCood(lat, lon),
+    enabled: !city
   });
 
- const {data:cityForecast,isLoading:isForecastLoading,error:forecastError} = useQuery({
-  queryKey:['ForecastByCoord',lat+lon],
-  queryFn: () => getCityForecast(lat,lon),
-  enabled:!city
- });
-
-
-
-
-  useEffect(() => {
-    //getCityForecast(lat,lon);
-  },[])
+  const { data: cityForecast, isLoading: isForecastLoading, error: forecastError } = useQuery<ForecastResponse>({
+    queryKey: ['ForecastByCoord', lat + lon],
+    queryFn: () => getCityForecast(lat, lon),
+    enabled: true
+  });
 
   return (
-   <div className="mt-[20px]">
+    <div className="mt-[20px]">
+      {city && <CityCard city={city} classNames="text-center mb-8 max-w-[80%] mx-auto" />}
+      {!city && newCity && <CityCard city={newCity} classNames="text-center mb-8 max-w-[80%] mx-auto" />}
 
-      
-
-      {city && <CityCard city={city} classNames="text-center mb-8 max-w-[80%] mx-auto"/>}
-      {!city && newCity && <CityCard city={newCity} classNames="text-center mb-8 max-w-[80%] mx-auto" /> }
-
-      <div>
-         {cityForecast?.map((city:CityData,index:number)=>{
-          const date = new Date(city.dt*1000)
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {cityForecast?.list.map((forecast: CityData, index: number) => {
+          const date = new Date(forecast.dt * 1000);
           const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
           const formattedDate = date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: '2-digit',
-            day: '2-digit',})
+            day: '2-digit',
+          });
 
-           return (
-            <div key={index }className="">
-               
-               <p> {city.main.temp}C</p>
-               <img 
-               className = "mx-auto w-[100px] min-h-[100px]"
-               src={`https://openweathermap.org/img/wn/${city.weather[0].icon}@2x.png`}
-               alt = {city.weather[0].description}
-                />
-              </div>
-           )
-            })}
+          return (
+            <div key={index} className="bg-blue-100 rounded-lg p-4 text-center shadow">
+              <p className="text-lg font-semibold">{dayName}</p>
+              <p className="text-sm">{formattedDate}</p>
+              <p className="text-xl">{forecast.main.temp}°C</p>
+              <img
+                className="mx-auto w-[100px] min-h-[100px]"
+                src={`https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png`}
+                alt={forecast.weather[0].description}
+              />
+              <p className="text-sm capitalize">{forecast.weather[0].description}</p>
+            </div>
+          );
+        })}
       </div>
-
-   </div>
+    </div>
   );
 };
 
